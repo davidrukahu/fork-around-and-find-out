@@ -6,6 +6,10 @@ A fast browser-game satire about keeping a fictional open-source Commons alive w
 
 Everything in the game is fictional. It does not reenact a lawsuit or make claims about real companies or people.
 
+**Play:** [davidrukahu.github.io/fork-around-and-find-out](https://davidrukahu.github.io/fork-around-and-find-out/)
+
+**Source:** [github.com/davidrukahu/fork-around-and-find-out](https://github.com/davidrukahu/fork-around-and-find-out)
+
 ## Play
 
 Open `index.html` directly, or serve the directory locally:
