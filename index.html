@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#26366e" />
+  <meta name="description" content="Fork Around & Find Out — a tiny arcade satire about keeping a fictional open-source commons alive." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Fork Around & Find Out" />
+  <meta property="og:description" content="A three-minute browser satire about keeping an open-source Commons alive. Free, fictional, and playable without a login." />
+  <meta property="og:image" content="social-card.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Fork Around & Find Out, an open-source arcade satire." />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Fork Around & Find Out" />
+  <meta name="twitter:description" content="Can you keep the Commons alive and defeat The Extraction Engine?" />
+  <meta name="twitter:image" content="social-card.png" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>Fork Around &amp; Find Out</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="desktop" id="desktop">
+    <section class="game-window" aria-label="Fork Around and Find Out game">
+      <header class="titlebar">
+        <div class="titlebar__mark" aria-hidden="true">F</div>
+        <h1>Fork Around &amp; Find Out.exe</h1>
+        <div class="window-buttons" aria-hidden="true"><span>_</span><span>□</span><span>×</span></div>
+      </header>
+
+      <div class="menubar" aria-label="Game menu">
+        <button id="newGameButton"><u>G</u>ame</button>
+        <button id="howButton"><u>H</u>elp</button>
+        <button id="aboutButton"><u>A</u>bout</button>
+        <button id="muteButton" aria-pressed="false">Sound: ON</button>
+        <span class="fiction-label">100% FICTIONAL • 0% LEGAL ADVICE</span>
+      </div>
+
+      <div class="status-ribbon">
+        <div class="cycle-block">
+          <span class="eyebrow">RELEASE CYCLE</span>
+          <strong id="cycleLabel">1 / 5</strong>
+        </div>
+        <div class="meter-block health-block">
+          <div class="meter-label"><span>COMMUNITY HEALTH</span><strong id="healthText">72%</strong></div>
+          <div class="pixel-meter" role="progressbar" aria-label="Community health" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72">
+            <i id="healthBar"></i>
+          </div>
+        </div>
+        <div class="meter-block">
+          <div class="meter-label"><span>NEXT RELEASE</span><strong id="releaseText">0%</strong></div>
+          <div class="pixel-meter release-meter" role="progressbar" aria-label="Release progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <i id="releaseBar"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <section class="playfield-shell">
+          <canvas id="gameCanvas" aria-label="Arcade playfield. Move the blue Commons tray with arrow keys, A and D, mouse, or touch. Catch items labeled CATCH or GRAB. Avoid items labeled AVOID." tabindex="0"></canvas>
+          <div class="scanlines" aria-hidden="true"></div>
+          <div class="boss-meter" id="bossMeter" hidden>
+            <span>THE EXTRACTION ENGINE</span>
+            <div><i id="bossBar"></i></div>
+          </div>
+          <div class="coach-banner" id="coachBanner" hidden aria-live="polite">
+            <b id="coachVerb">CATCH</b><span id="coachText">Bright work goes into the Commons</span>
+          </div>
+          <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+
+          <div class="start-panel" id="startPanel">
+            <div class="start-panel__logo" aria-hidden="true">
+              <span class="fork-glyph">⑂</span>
+              <span class="logo-burst">!</span>
+            </div>
+            <p class="kicker">OPEN SOURCE ARCADE SATIRE</p>
+            <h2>FORK AROUND<br><em>&amp; FIND OUT</em></h2>
+            <p class="lede">Keep the Commons alive while everyone insists their extraction is “strategic alignment.”</p>
+            <div class="rule-guide" aria-label="What to catch and avoid">
+              <div class="rule-guide__catch"><b>✓ CATCH</b><span>Bright work</span><i>⑂</i><i>+</i><i>≡</i></div>
+              <div class="rule-guide__avoid"><b>! AVOID</b><span>Red or gray trouble</span><i>§</i><i>×</i><i>$$</i></div>
+              <div class="rule-guide__power"><b>★ GRAB</b><span>Flashing power-ups</span><i>5×</i></div>
+            </div>
+            <div class="control-guide" aria-label="Game controls">
+              <div><span><kbd>←</kbd><kbd>→</kbd><em>or</em><kbd>A</kbd><kbd>D</kbd></span><p><b>MOVE THE BLUE TRAY</b><small>Mouse and touch work too</small></p></div>
+              <div><span><kbd>R</kbd></span><p><b>REINVEST IN THE COMMUNITY</b><small>Use revenue + code to restore the team</small></p></div>
+            </div>
+            <button class="big-button" id="startButton">BOOT THE COMMONS</button>
+            <small>3–5 MINUTES • NO LOGIN • FICTIONAL ENTITIES ONLY</small>
+          </div>
+
+          <div class="dialog" id="dialog" hidden role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+            <div class="dialog__title"><span id="dialogTitle">Commons Help</span><button id="dialogClose" aria-label="Close">×</button></div>
+            <div class="dialog__body" id="dialogBody"></div>
+            <button class="dialog__ok" id="dialogOk">OK</button>
+          </div>
+        </section>
+
+        <aside class="control-panel" aria-label="Commons control panel">
+          <div class="panel-heading"><span>COMMONS CONTROL</span><b id="statusLamp">ONLINE</b></div>
+
+          <section class="ledger">
+            <div class="ledger-row"><span>Shared code</span><strong><i class="code-dot"></i><b id="codeValue">42</b></strong></div>
+            <div class="ledger-row"><span>Host revenue</span><strong>$<b id="moneyValue">0</b></strong></div>
+            <div class="ledger-row"><span>Contributor energy</span><strong><b id="energyValue">68</b>%</strong></div>
+            <div class="ledger-row"><span>Public trust</span><strong><b id="trustValue">74</b>%</strong></div>
+            <div class="ledger-row"><span>Host uptime</span><strong><b id="uptimeValue">99.9</b>%</strong></div>
+          </section>
+
+          <button class="reinvest-button" id="reinvestButton" disabled>
+            <span>REINVEST $18 + 6 CODE</span>
+            <small id="reinvestHint">Need $18 revenue + 6 code</small>
+            <kbd>R</kbd>
+          </button>
+
+          <section class="host-machine">
+            <div class="machine-lights"><i></i><i></i><i></i></div>
+            <div class="machine-screen">
+              <span>SYNERGY HOST™</span>
+              <b id="extractionRate">extracting 1.0×</b>
+            </div>
+            <div class="machine-slot"><i></i></div>
+            <p>“We love the community.”</p>
+          </section>
+
+          <section class="power-panel">
+            <h3>ACTIVE EFFECTS</h3>
+            <div id="effectsList" class="effects-list"><p>None. Just vibes.</p></div>
+          </section>
+
+          <section class="legend">
+            <div class="legend-group legend-group--catch">
+              <h3>✓ CATCH THESE</h3>
+              <p><i>⑂</i> Commits <i>+</i> Fixes <i>≡</i> Docs <i>◷</i> Hours</p>
+            </div>
+            <div class="legend-group legend-group--avoid">
+              <h3>! AVOID THESE</h3>
+              <p><i>§</i> Lawyers <i>×</i> Bugs <i>$$</i> Invoices</p>
+            </div>
+            <div class="legend-group legend-group--power">
+              <h3>★ GRAB FLASHING POWER-UPS</h3>
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <footer class="statusbar">
+        <span id="statusMessage">Ready. The Commons is cautiously optimistic.</span>
+        <span id="scoreMessage">CONTRIBUTIONS: 0</span>
+      </footer>
+    </section>
+
+    <div class="desktop-note" aria-hidden="true">Please do not turn off your computer while capitalism is installing.</div>
+  </main>
+  <script src="game.js"></script>
+</body>
+</html>
