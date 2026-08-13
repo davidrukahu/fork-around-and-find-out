@@ -664,7 +664,7 @@
   }
 
   function showAbout() {
-    showDialog('About this tiny executable', `<h3>Systems satire, not a reenactment.</h3><p><i>Fork Around &amp; Find Out</i> is a fictional arcade game about the incentives that pull open-source communities in different directions. It does not represent real companies, people, or legal claims.</p><dl class="about-facts"><dt>Version</dt><dd>1.0 Community Edition</dd><dt>Built with</dt><dd>Vanilla HTML, CSS, Canvas, and JavaScript</dd><dt>Licence</dt><dd>MIT</dd><dt>Tracking</dt><dd>None</dd><dt>Credits</dt><dd>Created collaboratively with OpenAI Codex</dd></dl><p>Study it, fork it, remix it, and keep the Commons weird.</p>`, 'CLOSE');
+    showDialog('About this tiny executable', `<h3>Systems satire, not a reenactment.</h3><p><i>Fork Around &amp; Find Out</i> is a fictional arcade game about the incentives that pull open-source communities in different directions. It does not represent real companies, people, or legal claims.</p><dl class="about-facts"><dt>Version</dt><dd>1.0 Community Edition</dd><dt>Built with</dt><dd>Vanilla HTML, CSS, Canvas, and JavaScript</dd><dt>Licence</dt><dd>MIT</dd><dt>Tracking</dt><dd>None</dd><dt>Credits</dt><dd>Created collaboratively with OpenAI Codex</dd></dl><p>Study it, fork it, remix it, and keep the Commons weird.</p><a class="about-source" href="https://github.com/davidrukahu/fork-around-and-find-out" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub (opens in a new tab)">VIEW SOURCE ON GITHUB</a>`, 'CLOSE');
   }
 
   function challengeText() {
