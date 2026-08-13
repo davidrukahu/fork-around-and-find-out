@@ -23,7 +23,7 @@
     lawyer: { label: 'LAWYER', color: '#596078', value: 10, kind: 'bad' },
     bug: { label: 'BUG', color: '#d84b3f', value: 7, kind: 'bad' },
     invoice: { label: 'INVOICE', color: '#eee7c8', value: 8, kind: 'bad' },
-    five: { label: 'FIVE FOR FUTURE', color: '#ff8c32', kind: 'power' },
+    upkeep: { label: 'SHARED UPKEEP', color: '#ff8c32', kind: 'power' },
     fork: { label: 'EMERGENCY FORK', color: '#e850a7', kind: 'power' },
     shield: { label: 'TRADEMARK SHIELD', color: '#4474da', kind: 'power' },
     sabbatical: { label: 'SABBATICAL', color: '#79c85b', kind: 'power' }
@@ -32,7 +32,7 @@
   const cycleNames = ['SemVer-ish', 'Patch Tuesday?', 'Enterprise Pivot', 'Monetize Everything', 'Final Release Candidate'];
   const goodTypes = ['commit', 'fix', 'docs', 'hours'];
   const badTypes = ['lawyer', 'bug', 'invoice'];
-  const powerTypes = ['five', 'fork', 'shield', 'sabbatical'];
+  const powerTypes = ['upkeep', 'fork', 'shield', 'sabbatical'];
   const state = {
     running: false, paused: false, gameOver: false, muted: false, last: 0, elapsed: 0, cycleTime: 0, cycle: 1,
     cycleLength: 29, boss: false, bossHealth: 100, bossTime: 0, entities: [], particles: [], projectiles: [], floaters: [],
@@ -97,7 +97,7 @@
 
   function spawn(type, x = Math.random() * (W - 70) + 35, y = -35, guided = false) {
     const scale = Math.min(1.35, .88 + state.cycle * .08);
-    const sizes = { lawyer: 25, bug: 21, invoice: 24, five: 26, fork: 26, shield: 26, sabbatical: 26 };
+    const sizes = { lawyer: 25, bug: 21, invoice: 24, upkeep: 26, fork: 26, shield: 26, sabbatical: 26 };
     state.entities.push({ type, x, y, size: sizes[type] || 21, vy: guided ? 98 : (55 + Math.random() * 36 + state.cycle * 8) * scale, vx: guided ? 0 : (Math.random() - .5) * 22, spin: Math.random() * 6, caught: false, dodged: false, guided });
   }
 
@@ -259,9 +259,9 @@
   }
 
   function activatePower(type, now) {
-    if (type === 'five') {
+    if (type === 'upkeep') {
       state.multiplierUntil = now + 12000;
-      toast('<b>FIVE FOR THE FUTURE</b><br>Contributions count double for 12 seconds. Calendars cleared!');
+      toast('<b>SHARED UPKEEP</b><br>Contributions count double for 12 seconds. Calendars cleared!');
       status('Contribution multiplier online. The spreadsheet is inspirational.');
     } else if (type === 'fork') {
       state.forkUntil = now + 11000;
@@ -380,7 +380,7 @@
     ui.lamp.style.color = now < state.outageUntil || now < state.frozenUntil ? '#ffd33d' : '';
     if (state.boss) ui.bossBar.style.width = `${state.bossHealth}%`;
     const effects = [];
-    if (now < state.multiplierUntil) effects.push(['FIVE FOR FUTURE', state.multiplierUntil - now, 12000]);
+    if (now < state.multiplierUntil) effects.push(['SHARED UPKEEP', state.multiplierUntil - now, 12000]);
     if (now < state.forkUntil) effects.push(['EMERGENCY FORK', state.forkUntil - now, 11000]);
     if (state.shieldHits > 0) effects.push([`SHIELD ×${state.shieldHits}`, state.shieldHits, 3]);
     if (now < state.outageUntil) effects.push(['DIRECTORY PANIC', state.outageUntil - now, 10000]);
@@ -499,7 +499,7 @@
     ctx.save(); ctx.scale(pulse, pulse); ctx.rotate(e.spin * .35); pixelBox(-22, -22, 44, 44, t.color, '#4b3050');
     ctx.strokeStyle = '#ffd33d'; ctx.lineWidth = 4; ctx.strokeRect(-26, -26, 52, 52); ctx.restore();
     ctx.fillStyle = '#fff7dd'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '900 19px Verdana';
-    const symbols = { five: '5×', fork: '⑂', shield: '◇', sabbatical: 'Zz' };
+    const symbols = { upkeep: '2×', fork: '⑂', shield: '◇', sabbatical: 'Zz' };
     ctx.fillText(symbols[e.type], 0, -1);
   }
 
@@ -664,7 +664,7 @@
   }
 
   function showAbout() {
-    showDialog('About this tiny executable', `<h3>Systems satire, not a reenactment.</h3><p><i>Fork Around &amp; Find Out</i> is a fictional arcade game about the incentives that pull open-source communities in different directions. It does not represent real companies, people, or legal claims.</p><dl class="about-facts"><dt>Version</dt><dd>1.0 Community Edition</dd><dt>Built with</dt><dd>Vanilla HTML, CSS, Canvas, and JavaScript</dd><dt>Licence</dt><dd>MIT</dd><dt>Tracking</dt><dd>None</dd><dt>Credits</dt><dd>Created collaboratively with OpenAI Codex</dd></dl><p>Study it, fork it, remix it, and keep the Commons weird.</p><a class="about-source" href="https://github.com/davidrukahu/fork-around-and-find-out" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub (opens in a new tab)">VIEW SOURCE ON GITHUB</a>`, 'CLOSE');
+    showDialog('About this tiny executable', `<h3>Systems satire, not a reenactment.</h3><p><i>Fork Around &amp; Find Out</i> is a fictional arcade game about the incentives that pull open-source communities in different directions. It does not represent real companies, people, or legal claims.</p><p><b>Personal project.</b> Built on my own time and my own equipment. It is not affiliated with, sponsored by, or endorsed by my employer or any other organisation, and every opinion in it is mine alone.</p><dl class="about-facts"><dt>Version</dt><dd>1.0 Community Edition</dd><dt>Built with</dt><dd>Vanilla HTML, CSS, Canvas, and JavaScript</dd><dt>Licence</dt><dd>MIT</dd><dt>Tracking</dt><dd>None</dd><dt>Credits</dt><dd>Created collaboratively with OpenAI Codex</dd></dl><p>Study it, fork it, remix it, and keep the Commons weird.</p><a class="about-source" href="https://github.com/davidrukahu/fork-around-and-find-out" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub (opens in a new tab)">VIEW SOURCE ON GITHUB</a>`, 'CLOSE');
   }
 
   function challengeText() {

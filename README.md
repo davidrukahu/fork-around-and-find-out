@@ -6,6 +6,12 @@ A fast browser-game satire about keeping a fictional open-source Commons alive w
 
 Everything in the game is fictional. It does not reenact a lawsuit or make claims about real companies or people.
 
+## Disclaimer
+
+This is a personal project. I built it on my own time, on my own equipment, for fun. It is not affiliated with, sponsored by, endorsed by, or connected to my employer or any other organisation. Every opinion in it is mine alone and does not represent the views of any employer.
+
+The Commons, its maintainers, the power-ups, the hazards, and the final boss are invented. Any resemblance to a real project, company, dispute, or person is a coincidence of the genre, not a reference.
+
 **Play:** [davidrukahu.github.io/fork-around-and-find-out](https://davidrukahu.github.io/fork-around-and-find-out/)
 
 **Source:** [github.com/davidrukahu/fork-around-and-find-out](https://github.com/davidrukahu/fork-around-and-find-out)
