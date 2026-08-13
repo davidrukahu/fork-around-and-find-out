@@ -35,6 +35,7 @@
         <button id="newGameButton"><u>G</u>ame</button>
         <button id="howButton"><u>H</u>elp</button>
         <button id="aboutButton"><u>A</u>bout</button>
+        <button id="pauseButton" disabled><u>P</u>ause</button>
         <button id="muteButton" aria-pressed="false">Sound: ON</button>
         <span class="fiction-label">100% FICTIONAL • 0% LEGAL ADVICE</span>
       </div>
@@ -89,7 +90,18 @@
               <div><span><kbd>R</kbd></span><p><b>REINVEST IN THE COMMUNITY</b><small>Use revenue + code to restore the team</small></p></div>
             </div>
             <button class="big-button" id="startButton">BOOT THE COMMONS</button>
-            <small>3–5 MINUTES • NO LOGIN • FICTIONAL ENTITIES ONLY</small>
+            <small>3–5 MINUTES • P/ESC PAUSE • NO LOGIN • FICTIONAL ENTITIES ONLY</small>
+          </div>
+
+          <div class="pause-panel" id="pausePanel" hidden role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+            <div class="pause-panel__icon" aria-hidden="true">Ⅱ</div>
+            <h2 id="pauseTitle">THE COMMONS IS PAUSED</h2>
+            <p>Extraction has stopped. Billable hours are considering their options.</p>
+            <div class="pause-actions">
+              <button id="resumeButton">RESUME GAME</button>
+              <button id="exitButton">EXIT TO TITLE</button>
+            </div>
+            <small>PRESS P OR ESC TO RESUME</small>
           </div>
 
           <div class="dialog" id="dialog" hidden role="dialog" aria-modal="true" aria-labelledby="dialogTitle">

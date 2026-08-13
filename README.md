@@ -27,6 +27,7 @@ Then open `http://localhost:4173`.
 - Avoid red-framed hazards.
 - Grab flashing gold power-ups.
 - Press R when the yellow reinvestment button says READY.
+- Press P or Esc to pause, resume, or exit to the title screen.
 
 The full game takes about three to five minutes and requires no login.
 

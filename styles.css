@@ -269,6 +269,17 @@ kbd { min-width: 22px; display: inline-block; padding: 3px 5px; color: var(--ink
 .big-button:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 #111a3a; }
 .start-panel > small { margin-top: 12px; color: #abb9ec; font: 800 8px/1 Verdana, sans-serif; letter-spacing: .1em; }
 
+.pause-panel { position: absolute; z-index: 9; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; color: var(--cream); text-align: center; background: rgba(24,35,79,.94); }
+.pause-panel[hidden] { display: none; }
+.pause-panel__icon { width: 62px; height: 62px; display: grid; place-items: center; margin-bottom: 13px; color: var(--navy-deep); background: var(--yellow); border: 4px solid var(--cream); box-shadow: 6px 6px 0 var(--pink); font: 900 30px/1 Georgia, serif; }
+.pause-panel h2 { margin: 0; font: 900 clamp(24px, 4vw, 42px)/1 Impact, "Arial Black", sans-serif; letter-spacing: .01em; }
+.pause-panel p { max-width: 440px; margin: 12px 0 16px; color: #d7def8; font: 15px/1.35 Georgia, serif; }
+.pause-actions { display: flex; gap: 8px; }
+.pause-actions button { min-width: 150px; padding: 10px 12px; cursor: pointer; background: var(--yellow); border: 3px solid; border-color: var(--cream) #70601e #70601e var(--cream); font: 900 10px/1 Verdana, sans-serif; }
+.pause-actions button:last-child { color: var(--cream); background: transparent; border-color: #aab7e6 #17224b #17224b #aab7e6; }
+.pause-actions button:active { transform: translate(1px, 1px); }
+.pause-panel small { margin-top: 14px; color: #abb9ec; font: 800 8px/1 Verdana, sans-serif; letter-spacing: .1em; }
+
 .dialog { position: absolute; z-index: 10; left: 50%; top: 50%; width: min(430px, calc(100% - 24px)); transform: translate(-50%, -50%); padding: 3px; background: var(--panel); border: 3px solid; border-color: var(--light) #3e4139 #3e4139 var(--light); box-shadow: 8px 9px 0 rgba(21,24,38,.42); }
 .dialog[hidden] { display: none; }
 .dialog__title { display: flex; justify-content: space-between; align-items: center; padding: 4px 5px 4px 8px; color: var(--light); background: var(--navy); font: 800 12px/1 Verdana, sans-serif; }
@@ -334,6 +345,7 @@ kbd { min-width: 22px; display: inline-block; padding: 3px 5px; color: var(--ink
   .start-panel__logo { width: 58px; height: 48px; }
   .fork-glyph { font-size: 36px; }
   .lede { margin: 11px auto; font-size: 14px; }
+  .pause-actions { width: min(280px, 100%); flex-direction: column; }
 }
 
 @media (max-height: 660px) and (min-width: 761px) {

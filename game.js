@@ -5,7 +5,8 @@
   const ctx = canvas.getContext('2d');
   const $ = (id) => document.getElementById(id);
   const ui = {
-    startPanel: $('startPanel'), startButton: $('startButton'), newGame: $('newGameButton'), how: $('howButton'), about: $('aboutButton'), mute: $('muteButton'),
+    startPanel: $('startPanel'), startButton: $('startButton'), newGame: $('newGameButton'), how: $('howButton'), about: $('aboutButton'), pause: $('pauseButton'), mute: $('muteButton'),
+    pausePanel: $('pausePanel'), resume: $('resumeButton'), exit: $('exitButton'),
     dialog: $('dialog'), dialogTitle: $('dialogTitle'), dialogBody: $('dialogBody'), dialogClose: $('dialogClose'), dialogOk: $('dialogOk'),
     cycle: $('cycleLabel'), health: $('healthText'), healthBar: $('healthBar'), release: $('releaseText'), releaseBar: $('releaseBar'),
     code: $('codeValue'), money: $('moneyValue'), energy: $('energyValue'), trust: $('trustValue'), uptime: $('uptimeValue'),
@@ -37,7 +38,8 @@
     cycleLength: 29, boss: false, bossHealth: 100, bossTime: 0, entities: [], particles: [], projectiles: [], floaters: [],
     spawnTimer: 0, eventTimer: 16, health: 72, code: 42, money: 0, energy: 68, trust: 74, uptime: 99.9,
     contributions: 0, score: 0, extraction: 1, multiplierUntil: 0, forkUntil: 0, shieldHits: 0,
-    frozenUntil: 0, outageUntil: 0, combo: 0, comboTimer: 0, dodges: 0, tutorialDrop: 0, lastResult: null, playerX: 0, targetX: 0, keys: {}, audio: null
+    frozenUntil: 0, outageUntil: 0, combo: 0, comboTimer: 0, dodges: 0, tutorialDrop: 0, lastResult: null,
+    manualPause: false, autoPaused: false, playerX: 0, targetX: 0, keys: {}, audio: null
   };
 
   let W = 800, H = 500, dpr = 1;
@@ -59,9 +61,10 @@
       bossHealth: 100, bossTime: 0, entities: [], particles: [], projectiles: [], floaters: [], spawnTimer: .7, eventTimer: 15,
       health: 72, code: 42, money: 0, energy: 68, trust: 74, uptime: 99.9, contributions: 0, score: 0,
       extraction: 1, multiplierUntil: 0, forkUntil: 0, shieldHits: 0, frozenUntil: 0, outageUntil: 0,
-      combo: 0, comboTimer: 0, dodges: 0, tutorialDrop: 0, lastResult: null, playerX: W / 2, targetX: W / 2
+      combo: 0, comboTimer: 0, dodges: 0, tutorialDrop: 0, lastResult: null, manualPause: false, autoPaused: false, playerX: W / 2, targetX: W / 2
     });
     ui.startPanel.hidden = true;
+    ui.pausePanel.hidden = true;
     ui.dialog.hidden = true;
     ui.bossMeter.hidden = true;
     ui.coach.hidden = false;
@@ -361,6 +364,8 @@
     ui.code.textContent = Math.floor(state.code); ui.money.textContent = Math.floor(state.money);
     ui.energy.textContent = Math.round(state.energy); ui.trust.textContent = Math.round(state.trust); ui.uptime.textContent = state.uptime.toFixed(1);
     ui.extraction.textContent = `extracting ${state.extraction.toFixed(1)}×`;
+    ui.pause.disabled = !state.running || state.gameOver || !ui.dialog.hidden;
+    ui.pause.textContent = state.manualPause ? 'Resume' : 'Pause';
     const canReinvest = state.money >= 18 && state.code >= 6 && state.running && now >= state.frozenUntil;
     ui.reinvest.disabled = !canReinvest;
     ui.reinvest.classList.toggle('is-ready', canReinvest);
@@ -613,15 +618,49 @@
 
   function showDialog(title, body, button = 'OK') {
     state.paused = state.running;
+    ui.pause.disabled = true;
     ui.dialogTitle.textContent = title; ui.dialogBody.innerHTML = body; ui.dialogOk.textContent = button; ui.dialog.hidden = false; ui.dialogOk.focus();
   }
   function closeDialog() {
     const replay = state.gameOver;
-    ui.dialog.hidden = true; state.paused = false;
-    if (replay) reset(); else canvas.focus();
+    ui.dialog.hidden = true; state.paused = state.manualPause;
+    if (replay) reset();
+    else {
+      updateUI();
+      if (state.manualPause) ui.resume.focus();
+      else if (state.running) canvas.focus();
+      else ui.startButton.focus();
+    }
+  }
+
+  function togglePause() {
+    if (!state.running || state.gameOver || !ui.dialog.hidden) return;
+    state.manualPause = !state.manualPause;
+    state.paused = state.manualPause;
+    state.autoPaused = false;
+    ui.pausePanel.hidden = !state.manualPause;
+    ui.pause.textContent = state.manualPause ? 'Resume' : 'Pause';
+    status(state.manualPause ? 'Paused. The backlog has agreed to remain exactly where it is.' : 'Resumed. The backlog denies moving while unattended.');
+    if (state.manualPause) ui.resume.focus();
+    else { state.last = performance.now(); canvas.focus(); }
+  }
+
+  function returnToTitle() {
+    Object.assign(state, {
+      running: false, paused: false, gameOver: false, manualPause: false, autoPaused: false,
+      elapsed: 0, cycleTime: 0, cycle: 1, boss: false, bossTime: 0, bossHealth: 100,
+      entities: [], particles: [], projectiles: [], floaters: [], spawnTimer: 0, eventTimer: 16,
+      health: 72, code: 42, money: 0, energy: 68, trust: 74, uptime: 99.9, contributions: 0, dodges: 0, score: 0,
+      extraction: 1, multiplierUntil: 0, forkUntil: 0, shieldHits: 0, frozenUntil: 0, outageUntil: 0,
+      combo: 0, comboTimer: 0, tutorialDrop: 0, lastResult: null, playerX: W / 2, targetX: W / 2
+    });
+    ui.pausePanel.hidden = true; ui.coach.hidden = true; ui.bossMeter.hidden = true; ui.startPanel.hidden = false;
+    ui.toasts.replaceChildren();
+    status('Ready. The Commons is cautiously optimistic.');
+    updateUI(); ui.startButton.focus();
   }
   function showHelp() {
-    showDialog('How to sustain a Commons', `<h3>Move the blue tray. Read the falling labels.</h3><ul><li><b>Move:</b> use ← →, A D, mouse, or touch.</li><li><b>CATCH:</b> commits, fixes, docs, and volunteer hours have green frames.</li><li><b>AVOID:</b> lawyers, bugs, and invoices have red frames and wobble.</li><li><b>GRAB:</b> flashing gold power-ups give temporary advantages.</li><li><b>Reinvest:</b> when the yellow button says READY, press R. Spending $18 revenue + 6 code restores health, energy, and trust.</li><li><b>Final boss:</b> catches attack; reinvestment deals heavy damage.</li></ul><p><b>Tip:</b> Useful work creates shared code. The host converts code into revenue. Put some of that value back before the community burns out.</p>`);
+    showDialog('How to sustain a Commons', `<h3>Move the blue tray. Read the falling labels.</h3><ul><li><b>Move:</b> use ← →, A D, mouse, or touch.</li><li><b>CATCH:</b> commits, fixes, docs, and volunteer hours have green frames.</li><li><b>AVOID:</b> lawyers, bugs, and invoices have red frames and wobble.</li><li><b>GRAB:</b> flashing gold power-ups give temporary advantages.</li><li><b>Reinvest:</b> when the yellow button says READY, press R. Spending $18 revenue + 6 code restores health, energy, and trust.</li><li><b>Pause or exit:</b> press P or Esc. The pause screen can resume the run or return to the title.</li><li><b>Final boss:</b> catches attack; reinvestment deals heavy damage.</li></ul><p><b>Tip:</b> Useful work creates shared code. The host converts code into revenue. Put some of that value back before the community burns out.</p>`);
   }
 
   function showAbout() {
@@ -684,17 +723,17 @@
     if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
     if (key === 'r') reinvest();
     if (e.key === 'Escape' && !ui.dialog.hidden) closeDialog();
+    else if ((key === 'p' || e.key === 'Escape') && state.running) { e.preventDefault(); togglePause(); }
   });
   window.addEventListener('keyup', (e) => { state.keys[e.key.length === 1 ? e.key.toLowerCase() : e.key] = false; });
   window.addEventListener('resize', resize);
   document.addEventListener('visibilitychange', () => {
-    if (!state.running || state.gameOver || !ui.dialog.hidden) return;
+    if (!state.running || state.gameOver || !ui.dialog.hidden || state.manualPause) return;
     if (document.hidden) {
-      state.paused = true;
+      state.paused = true; state.autoPaused = true;
       status('Paused while you inspect a different tab. Healthy boundaries!');
-    } else {
-      state.paused = false;
-      state.last = performance.now();
+    } else if (state.autoPaused) {
+      state.paused = false; state.autoPaused = false; state.last = performance.now();
       status('Welcome back. The backlog noticed nothing.');
     }
   });
@@ -703,6 +742,9 @@
   ui.newGame.addEventListener('click', reset);
   ui.how.addEventListener('click', showHelp);
   ui.about.addEventListener('click', showAbout);
+  ui.pause.addEventListener('click', togglePause);
+  ui.resume.addEventListener('click', togglePause);
+  ui.exit.addEventListener('click', returnToTitle);
   ui.reinvest.addEventListener('click', reinvest);
   ui.dialogBody.addEventListener('click', (event) => {
     const button = event.target.closest('[data-share]');
