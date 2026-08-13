@@ -35,18 +35,6 @@ The full game takes about three to five minutes and requires no login.
 
 The game has no build step and no external runtime dependencies. It uses HTML, CSS, Canvas, vanilla JavaScript, and the Web Audio API. It does not include analytics or tracking.
 
-## Publish with GitHub Pages
-
-1. Create a repository and place these files at its root.
-2. Push the default branch to GitHub.
-3. In **Settings → Pages**, publish from the root of the default branch.
-4. When the public URL is known, add it as the canonical URL and use its absolute `social-card.png` URL in the Open Graph metadata.
-5. Test the public URL on desktop and mobile before announcing it.
-
-## Publish on itch.io
-
-Upload `fork-around-and-find-out-itch.zip` as an **HTML Game**. The archive places `index.html` at its root, as itch.io requires. Enable **Mobile Friendly** and use **Click to launch in fullscreen**.
-
 ## Contributing
 
 Small fixes, accessibility improvements, new fictional events, and well-balanced satire are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
