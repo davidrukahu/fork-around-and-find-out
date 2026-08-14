@@ -12,7 +12,9 @@
     code: $('codeValue'), money: $('moneyValue'), energy: $('energyValue'), trust: $('trustValue'), uptime: $('uptimeValue'),
     reinvest: $('reinvestButton'), reinvestHint: $('reinvestHint'), extraction: $('extractionRate'), effects: $('effectsList'), status: $('statusMessage'), score: $('scoreMessage'),
     bossMeter: $('bossMeter'), bossBar: $('bossBar'), toasts: $('toastStack'), lamp: $('statusLamp'), desktop: $('desktop'),
-    coach: $('coachBanner'), coachVerb: $('coachVerb'), coachText: $('coachText')
+    coach: $('coachBanner'), coachVerb: $('coachVerb'), coachText: $('coachText'), playfield: $('playfieldShell'),
+    touchControls: $('touchControls'), touchLeft: $('touchLeft'), touchRight: $('touchRight'), touchReinvest: $('touchReinvest'),
+    touchReinvestHint: $('touchReinvestHint'), touchPause: $('touchPause')
   };
 
   const TYPES = {
@@ -39,12 +41,13 @@
     spawnTimer: 0, eventTimer: 16, health: 72, code: 42, money: 0, energy: 68, trust: 74, uptime: 99.9,
     contributions: 0, score: 0, extraction: 1, multiplierUntil: 0, forkUntil: 0, shieldHits: 0,
     frozenUntil: 0, outageUntil: 0, combo: 0, comboTimer: 0, dodges: 0, tutorialDrop: 0, lastResult: null,
-    manualPause: false, autoPaused: false, playerX: 0, targetX: 0, keys: {}, audio: null
+    manualPause: false, autoPaused: false, playerX: 0, targetX: 0, keys: {}, touchDirection: 0, touchPointerId: null, audio: null
   };
 
   let W = 800, H = 500, dpr = 1;
 
   function resize() {
+    syncTouchControls();
     const rect = canvas.getBoundingClientRect();
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = Math.max(320, Math.floor(rect.width));
@@ -55,13 +58,32 @@
     if (!state.running) state.playerX = state.targetX = W / 2;
   }
 
+  function touchControlsAvailable() {
+    return navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 760;
+  }
+
+  function clearTouchDirection() {
+    state.touchDirection = 0;
+    state.touchPointerId = null;
+    ui.touchLeft.classList.remove('is-pressed');
+    ui.touchRight.classList.remove('is-pressed');
+  }
+
+  function syncTouchControls() {
+    const visible = state.running && !state.gameOver && touchControlsAvailable();
+    ui.touchControls.hidden = !visible;
+    ui.playfield.classList.toggle('has-touch-controls', visible);
+    if (!visible) clearTouchDirection();
+  }
+
   function reset() {
     Object.assign(state, {
       running: true, paused: false, gameOver: false, last: performance.now(), elapsed: 0, cycleTime: 0, cycle: 1, boss: false,
       bossHealth: 100, bossTime: 0, entities: [], particles: [], projectiles: [], floaters: [], spawnTimer: .7, eventTimer: 15,
       health: 72, code: 42, money: 0, energy: 68, trust: 74, uptime: 99.9, contributions: 0, score: 0,
       extraction: 1, multiplierUntil: 0, forkUntil: 0, shieldHits: 0, frozenUntil: 0, outageUntil: 0,
-      combo: 0, comboTimer: 0, dodges: 0, tutorialDrop: 0, lastResult: null, manualPause: false, autoPaused: false, playerX: W / 2, targetX: W / 2
+      combo: 0, comboTimer: 0, dodges: 0, tutorialDrop: 0, lastResult: null, manualPause: false, autoPaused: false,
+      playerX: W / 2, targetX: W / 2, touchDirection: 0, touchPointerId: null
     });
     ui.startPanel.hidden = true;
     ui.pausePanel.hidden = true;
@@ -69,6 +91,8 @@
     ui.bossMeter.hidden = true;
     ui.coach.hidden = false;
     ui.desktop.classList.remove('panic');
+    syncTouchControls();
+    resize();
     canvas.focus();
     ensureAudio();
     status('Release 1 booted. Catch useful work; dodge expensive stationery.');
@@ -117,7 +141,8 @@
     ui.desktop.classList.toggle('panic', outage);
 
     if (!frozen) {
-      const direction = (state.keys.ArrowRight || state.keys.d ? 1 : 0) - (state.keys.ArrowLeft || state.keys.a ? 1 : 0);
+      const keyboardDirection = (state.keys.ArrowRight || state.keys.d ? 1 : 0) - (state.keys.ArrowLeft || state.keys.a ? 1 : 0);
+      const direction = clamp(keyboardDirection + state.touchDirection, -1, 1);
       if (direction) state.targetX += direction * 330 * dt * (outage ? -1 : 1);
       state.targetX = clamp(state.targetX, 48, W - 48);
       state.playerX += (state.targetX - state.playerX) * Math.min(1, dt * 13);
@@ -340,6 +365,7 @@
   function endGame(win) {
     if (state.gameOver) return;
     state.gameOver = true; state.running = false;
+    syncTouchControls();
     ui.bossMeter.hidden = true;
     ui.coach.hidden = true;
     const rank = state.score > 2200 ? 'Benevolent Dictator of Balance' : state.score > 1400 ? 'Senior Forklift Operator' : 'Volunteer Issue Triager';
@@ -375,6 +401,12 @@
       ? 'READY • Spend $18 + 6 code • Restore health, energy & trust'
       : `Need ${moneyNeeded ? `$${moneyNeeded} more revenue` : '$18 ready'}${codeNeeded ? ` + ${codeNeeded} more code` : ' + code ready'}`;
     ui.reinvest.setAttribute('aria-label', canReinvest ? 'Reinvest now. Spend 18 dollars and 6 code to restore health, energy, and trust.' : ui.reinvestHint.textContent);
+    ui.touchReinvest.disabled = !canReinvest;
+    ui.touchReinvest.classList.toggle('is-ready', canReinvest);
+    const touchNeeds = [moneyNeeded ? `$${moneyNeeded}` : '', codeNeeded ? `${codeNeeded} CODE` : ''].filter(Boolean).join(' + ');
+    ui.touchReinvestHint.textContent = canReinvest ? 'READY • TAP NOW' : `NEED ${touchNeeds || '$18 + 6 CODE'}`;
+    ui.touchReinvest.setAttribute('aria-label', canReinvest ? 'Reinvest now. Spend 18 dollars and 6 code.' : ui.reinvestHint.textContent);
+    ui.touchPause.disabled = ui.pause.disabled;
     ui.score.textContent = `CAUGHT: ${state.contributions}  •  DODGED: ${state.dodges}  •  PTS: ${Math.round(state.score)}`;
     ui.lamp.textContent = now < state.outageUntil ? 'PANIC' : now < state.frozenUntil ? 'FROZEN' : 'ONLINE';
     ui.lamp.style.color = now < state.outageUntil || now < state.frozenUntil ? '#ffd33d' : '';
@@ -397,7 +429,7 @@
     ui.coach.className = 'coach-banner';
     if (state.elapsed < 3.5) {
       ui.coachVerb.textContent = '1 • MOVE';
-      ui.coachText.textContent = 'Move the blue tray: mouse, touch, ← →, or A D';
+      ui.coachText.textContent = 'Hold the arrows below, drag or tap, or use ← → / A D';
     } else if (state.elapsed < 8) {
       ui.coach.classList.add('is-catch');
       ui.coachVerb.textContent = '2 • CATCH';
@@ -409,7 +441,7 @@
     } else {
       ui.coach.classList.add('is-invest');
       ui.coachVerb.textContent = '4 • REINVEST';
-      ui.coachText.textContent = 'When the yellow button says READY, press R';
+      ui.coachText.textContent = 'Tap the yellow REINVEST button when it says READY';
     }
   }
 
@@ -638,6 +670,7 @@
     state.manualPause = !state.manualPause;
     state.paused = state.manualPause;
     state.autoPaused = false;
+    clearTouchDirection();
     ui.pausePanel.hidden = !state.manualPause;
     ui.pause.textContent = state.manualPause ? 'Resume' : 'Pause';
     status(state.manualPause ? 'Paused. The backlog has agreed to remain exactly where it is.' : 'Resumed. The backlog denies moving while unattended.');
@@ -652,15 +685,18 @@
       entities: [], particles: [], projectiles: [], floaters: [], spawnTimer: 0, eventTimer: 16,
       health: 72, code: 42, money: 0, energy: 68, trust: 74, uptime: 99.9, contributions: 0, dodges: 0, score: 0,
       extraction: 1, multiplierUntil: 0, forkUntil: 0, shieldHits: 0, frozenUntil: 0, outageUntil: 0,
-      combo: 0, comboTimer: 0, tutorialDrop: 0, lastResult: null, playerX: W / 2, targetX: W / 2
+      combo: 0, comboTimer: 0, tutorialDrop: 0, lastResult: null, playerX: W / 2, targetX: W / 2,
+      touchDirection: 0, touchPointerId: null
     });
     ui.pausePanel.hidden = true; ui.coach.hidden = true; ui.bossMeter.hidden = true; ui.startPanel.hidden = false;
     ui.toasts.replaceChildren();
+    syncTouchControls();
+    resize();
     status('Ready. The Commons is cautiously optimistic.');
     updateUI(); ui.startButton.focus();
   }
   function showHelp() {
-    showDialog('How to sustain a Commons', `<h3>Move the blue tray. Read the falling labels.</h3><ul><li><b>Move:</b> use ← →, A D, mouse, or touch.</li><li><b>CATCH:</b> commits, fixes, docs, and volunteer hours have green frames.</li><li><b>AVOID:</b> lawyers, bugs, and invoices have red frames and wobble.</li><li><b>GRAB:</b> flashing gold power-ups give temporary advantages.</li><li><b>Reinvest:</b> when the yellow button says READY, press R. Spending $18 revenue + 6 code restores health, energy, and trust.</li><li><b>Pause or exit:</b> press P or Esc. The pause screen can resume the run or return to the title.</li><li><b>Final boss:</b> catches attack; reinvestment deals heavy damage.</li></ul><p><b>Tip:</b> Useful work creates shared code. The host converts code into revenue. Put some of that value back before the community burns out.</p>`);
+    showDialog('How to sustain a Commons', `<h3>Move the blue tray. Read the falling labels.</h3><ul><li><b>Move:</b> hold the on-screen arrows, drag or tap the playfield, or use ← → / A D.</li><li><b>CATCH:</b> commits, fixes, docs, and volunteer hours have green frames.</li><li><b>AVOID:</b> lawyers, bugs, and invoices have red frames and wobble.</li><li><b>GRAB:</b> flashing gold power-ups give temporary advantages.</li><li><b>Reinvest:</b> tap REINVEST when it says READY, or press R. Spending $18 revenue + 6 code restores health, energy, and trust.</li><li><b>Pause or exit:</b> tap PAUSE or press P / Esc. The pause screen can resume the run or return to the title.</li><li><b>Final boss:</b> catches attack; reinvestment deals heavy damage.</li></ul><p><b>Tip:</b> Useful work creates shared code. The host converts code into revenue. Put some of that value back before the community burns out.</p>`);
   }
 
   function showAbout() {
@@ -709,14 +745,37 @@
     update(dt, now); draw(now); requestAnimationFrame(frame);
   }
 
-  canvas.addEventListener('pointermove', (e) => {
+  function moveCommonsToPointer(e) {
     if (!state.running || state.paused) return;
     const rect = canvas.getBoundingClientRect();
     let x = e.clientX - rect.left;
     if (performance.now() < state.outageUntil) x = W - x;
     state.targetX = clamp(x, 48, W - 48);
+  }
+
+  function startTouchMove(e, direction) {
+    if (!state.running || state.paused) return;
+    e.preventDefault();
+    ensureAudio();
+    clearTouchDirection();
+    state.touchDirection = direction;
+    state.touchPointerId = e.pointerId;
+    e.currentTarget.classList.add('is-pressed');
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  }
+
+  function stopTouchMove(e) {
+    if (state.touchPointerId !== null && e.pointerId !== state.touchPointerId) return;
+    clearTouchDirection();
+  }
+
+  canvas.addEventListener('pointermove', moveCommonsToPointer);
+  canvas.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    canvas.setPointerCapture?.(e.pointerId);
+    ensureAudio();
+    moveCommonsToPointer(e);
   });
-  canvas.addEventListener('pointerdown', (e) => { canvas.setPointerCapture?.(e.pointerId); ensureAudio(); });
   window.addEventListener('keydown', (e) => {
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     state.keys[key] = true;
@@ -727,6 +786,7 @@
   });
   window.addEventListener('keyup', (e) => { state.keys[e.key.length === 1 ? e.key.toLowerCase() : e.key] = false; });
   window.addEventListener('resize', resize);
+  window.addEventListener('blur', clearTouchDirection);
   document.addEventListener('visibilitychange', () => {
     if (!state.running || state.gameOver || !ui.dialog.hidden || state.manualPause) return;
     if (document.hidden) {
@@ -746,6 +806,15 @@
   ui.resume.addEventListener('click', togglePause);
   ui.exit.addEventListener('click', returnToTitle);
   ui.reinvest.addEventListener('click', reinvest);
+  ui.touchReinvest.addEventListener('click', reinvest);
+  ui.touchPause.addEventListener('click', togglePause);
+  [ui.touchLeft, ui.touchRight].forEach((button, index) => {
+    const direction = index === 0 ? -1 : 1;
+    button.addEventListener('pointerdown', (event) => startTouchMove(event, direction));
+    button.addEventListener('pointerup', stopTouchMove);
+    button.addEventListener('pointercancel', stopTouchMove);
+    button.addEventListener('lostpointercapture', stopTouchMove);
+  });
   ui.dialogBody.addEventListener('click', (event) => {
     const button = event.target.closest('[data-share]');
     if (!button) return;

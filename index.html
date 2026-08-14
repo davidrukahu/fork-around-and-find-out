@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#26366e" />
   <meta name="description" content="Fork Around & Find Out — a tiny arcade satire about keeping a fictional open-source commons alive." />
   <meta property="og:type" content="website" />
@@ -20,7 +20,7 @@
   <link rel="canonical" href="https://davidrukahu.github.io/fork-around-and-find-out/" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <title>Fork Around &amp; Find Out</title>
-  <link rel="stylesheet" href="styles.css?v=1.1" />
+  <link rel="stylesheet" href="styles.css?v=1.2" />
 </head>
 <body>
   <main class="desktop" id="desktop">
@@ -60,9 +60,23 @@
       </div>
 
       <div class="workspace">
-        <section class="playfield-shell">
+        <section class="playfield-shell" id="playfieldShell">
           <canvas id="gameCanvas" aria-label="Arcade playfield. Move the blue Commons tray with arrow keys, A and D, mouse, or touch. Catch items labeled CATCH or GRAB. Avoid items labeled AVOID." tabindex="0"></canvas>
           <div class="scanlines" aria-hidden="true"></div>
+          <nav class="touch-controls" id="touchControls" aria-label="Touch game controls" hidden>
+            <button class="touch-control touch-control--move" id="touchLeft" aria-label="Hold to move the Commons left">
+              <strong aria-hidden="true">←</strong><small>HOLD</small>
+            </button>
+            <button class="touch-control touch-control--reinvest" id="touchReinvest" disabled>
+              <strong>REINVEST</strong><small id="touchReinvestHint">NEED $18 + 6 CODE</small>
+            </button>
+            <button class="touch-control touch-control--move" id="touchRight" aria-label="Hold to move the Commons right">
+              <strong aria-hidden="true">→</strong><small>HOLD</small>
+            </button>
+            <button class="touch-control touch-control--pause" id="touchPause" aria-label="Pause game">
+              <strong aria-hidden="true">Ⅱ</strong><small>PAUSE</small>
+            </button>
+          </nav>
           <div class="boss-meter" id="bossMeter" hidden>
             <span>THE EXTRACTION ENGINE</span>
             <div><i id="bossBar"></i></div>
@@ -86,8 +100,8 @@
               <div class="rule-guide__power"><b>★ GRAB</b><span>Flashing power-ups</span><i>2×</i></div>
             </div>
             <div class="control-guide" aria-label="Game controls">
-              <div><span><kbd>←</kbd><kbd>→</kbd><em>or</em><kbd>A</kbd><kbd>D</kbd></span><p><b>MOVE THE BLUE TRAY</b><small>Mouse and touch work too</small></p></div>
-              <div><span><kbd>R</kbd></span><p><b>REINVEST IN THE COMMUNITY</b><small>Use revenue + code to restore the team</small></p></div>
+              <div><span><kbd>←</kbd><kbd>→</kbd><em>or</em><kbd>A</kbd><kbd>D</kbd></span><p><b>MOVE THE BLUE TRAY</b><small>Drag, tap, or hold the touch arrows</small></p></div>
+              <div><span><kbd>R</kbd></span><p><b>REINVEST IN THE COMMUNITY</b><small>Tap REINVEST when READY, or press R</small></p></div>
             </div>
             <button class="big-button" id="startButton">BOOT THE COMMONS</button>
             <small>3–5 MINUTES • P/ESC PAUSE • NO LOGIN • FICTIONAL ENTITIES ONLY</small>
